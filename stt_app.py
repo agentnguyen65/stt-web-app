@@ -35,49 +35,44 @@ with st.sidebar:
         "4. Điều kiện Dừng (VD: Người dùng nói 'Dừng')",
         value="Người dùng nhấn nút Dừng hoặc nói từ khóa 'Kết thúc'"
     )
-
-from streamlit_webrtc import webrtc_streamer, WebRtcMode
+from streamlit_audiorecorder import st_audiorecorder
 import streamlit as st
 # ... các import và setup khác ...
 
 # ----------------- Vùng Nhập Audio Chính (CHỈ MIC) -----------------
-st.header("🗣️ Nguồn Âm Thanh Đầu Vào (Mic Trực Tiếp)")
-st.info("Nhấn 'Start' bên dưới để kích hoạt Mic và bắt đầu ghi âm. Trình duyệt sẽ yêu cầu quyền truy cập.")
+st.header("🗣️ Nguồn Âm Thanh Đầu Vào (Ghi Âm Trực Tiếp)")
+st.info("Nhấn **'Record'** bên dưới để kích hoạt Mic và ghi lại giọng nói của bạn.")
 
-# Sử dụng WebRTC để bật mic
-ctx = webrtc_streamer(
-    key="mic-stt-input",
-    mode=WebRtcMode.SENDONLY, # Chỉ gửi dữ liệu từ mic, không hiển thị video
-    audio_html_attrs={
-        "autoPlay": True, 
-        "controls": True, 
-        "muted": False
-    },
-)
+# Sử dụng component chuyên biệt để ghi âm
+# Kết quả trả về là bytes của file WAV đã ghi âm
+wav_audio_data = st_audiorecorder()
 
-# Thao tác: Kiểm tra xem luồng mic đã hoạt động chưa
+# Thao tác: Kiểm tra xem người dùng đã ghi âm xong chưa
 audio_source_input = None
-if ctx.state.playing:
-    st.success("Mic đang hoạt động! Bắt đầu nói...")
-    # Trong môi trường thực, bạn sẽ lấy dữ liệu từ ctx.audio_receiver
-    audio_source_input = "Mic Trực Tiếp Đã Ghi Âm (WebRTC)"
-else:
-    st.warning("Vui lòng nhấn 'Start' ở khung WebRTC để bật Mic.")
+if wav_audio_data is not None:
+    # Nếu có dữ liệu, hiển thị trình phát lại và xác nhận đã ghi âm
+    st.audio(wav_audio_data, format='audio/wav')
+    st.success("✅ Ghi âm hoàn tất! Dữ liệu Audio đã sẵn sàng.")
+    audio_source_input = "Mic Trực Tiếp Đã Ghi Âm (Bytes)"
     
 # ... phần còn lại của code ...
-
 
 # ----------------- Nút Thực thi -----------------
 if st.button('✨ Tạo Kết Quả Chuyển Đổi', type="primary"):
     if audio_source_input is not None:
         # Chuẩn bị dữ liệu đầu vào cho API
         input_data = {
-            'audio_source': audio_source_input,
-            'export_mode': export_mode,
-            'target_language': target_language,
-            'publish_condition': publish_condition,
-            'stop_condition': stop_condition,
+            'audio_source': audio_source_input, # Đây chính là bytes audio cần xử lý
+            # ... các tham số khác ...
         }
+        
+        # ... logic xử lý kết quả và hiển thị OUTPUT ...
+
+    else:
+        st.warning("Vui lòng ghi âm giọng nói trước khi nhấn nút Tạo Kết Quả.")
+
+
+
         
         # Gọi hàm xử lý (mô phỏng)
         with st.spinner('Đang lắng nghe và chuyển đổi giọng nói...'):
@@ -99,4 +94,5 @@ if st.button('✨ Tạo Kết Quả Chuyển Đổi', type="primary"):
         st.success(f"Chế độ xuất: **{result['export_mode_used']}**")
     else:
         st.warning("Vui lòng nhấn **'Bắt Đầu Ghi Âm'** để tạo dữ liệu đầu vào.")
+
 
