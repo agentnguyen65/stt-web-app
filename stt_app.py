@@ -1,3 +1,4 @@
+from streamlit_audiorecorder import st_audiorecorder
 import streamlit as st
 
 # ----------------- Cấu hình Giao diện -----------------
@@ -20,7 +21,7 @@ with st.sidebar:
     # INPUT 2: Ngôn ngữ Mục tiêu
     target_language = st.selectbox(
         "2. Ngôn ngữ Mục tiêu",
-        ('Tiếng Việt', 'Tiếng Anh', 'Tiếng Trung', 'Tiếng Nhật', 'Tiếng Hàn'),
+        ('Tiếng Việt', 'Tiếng Anh', 'Tiếng Pháp', 'Khác...'),
         index=0
     )
 
@@ -35,16 +36,12 @@ with st.sidebar:
         "4. Điều kiện Dừng (VD: Người dùng nói 'Dừng')",
         value="Người dùng nhấn nút Dừng hoặc nói từ khóa 'Kết thúc'"
     )
-from streamlit_audiorecorder import st_audiorecorder
-import streamlit as st
-# ... các import và setup khác ...
 
 # ----------------- Vùng Nhập Audio Chính (CHỈ MIC) -----------------
 st.header("🗣️ Nguồn Âm Thanh Đầu Vào (Ghi Âm Trực Tiếp)")
 st.info("Nhấn **'Record'** bên dưới để kích hoạt Mic và ghi lại giọng nói của bạn.")
 
 # Sử dụng component chuyên biệt để ghi âm
-# Kết quả trả về là bytes của file WAV đã ghi âm
 wav_audio_data = st_audiorecorder()
 
 # Thao tác: Kiểm tra xem người dùng đã ghi âm xong chưa
@@ -53,33 +50,27 @@ if wav_audio_data is not None:
     # Nếu có dữ liệu, hiển thị trình phát lại và xác nhận đã ghi âm
     st.audio(wav_audio_data, format='audio/wav')
     st.success("✅ Ghi âm hoàn tất! Dữ liệu Audio đã sẵn sàng.")
-    audio_source_input = "Mic Trực Tiếp Đã Ghi Âm (Bytes)"
+    # Cần dữ liệu bytes để xử lý STT thực tế
+    audio_source_input = wav_audio_data
     
-# ... phần còn lại của code ...
-
 # ----------------- Nút Thực thi -----------------
 if st.button('✨ Tạo Kết Quả Chuyển Đổi', type="primary"):
     if audio_source_input is not None:
         # Chuẩn bị dữ liệu đầu vào cho API
         input_data = {
-            'audio_source': audio_source_input, # Đây chính là bytes audio cần xử lý
-            # ... các tham số khác ...
+            'audio_source': "Mic Data", # Chỉ dùng để minh họa trong placeholder
+            'export_mode': export_mode,
+            'target_language': target_language,
+            'publish_condition': publish_condition,
+            'stop_condition': stop_condition,
         }
         
-        # ... logic xử lý kết quả và hiển thị OUTPUT ...
-
-    else:
-        st.warning("Vui lòng ghi âm giọng nói trước khi nhấn nút Tạo Kết Quả.")
-
-
-
-        
         # Gọi hàm xử lý (mô phỏng)
-        with st.spinner('Đang lắng nghe và chuyển đổi giọng nói...'):
-            # result = generate_stt_result(input_data) # Dùng trong môi trường thực
+        with st.spinner('Đang xử lý và chuyển đổi giọng nói...'):
+            # result = generate_stt_result(input_data, wav_audio_data) # Dùng trong môi trường thực
             # Mô phỏng kết quả:
             result = {
-                "transcribed_text": "Đây là văn bản được chuyển đổi **trực tiếp từ mic của bạn**, tuân theo các điều kiện xuất bản và dừng đã thiết lập trong khung sườn logic STT. Chế độ File Uploader đã bị loại bỏ.",
+                "transcribed_text": "Đây là văn bản được chuyển đổi **trực tiếp từ mic của bạn**, dựa trên: Ngôn ngữ [" + target_language + "], Xuất bản [" + publish_condition + "]. Chế độ File Uploader đã bị loại bỏ.",
                 "export_mode_used": export_mode
             }
 
@@ -93,6 +84,7 @@ if st.button('✨ Tạo Kết Quả Chuyển Đổi', type="primary"):
         )
         st.success(f"Chế độ xuất: **{result['export_mode_used']}**")
     else:
-        st.warning("Vui lòng nhấn **'Bắt Đầu Ghi Âm'** để tạo dữ liệu đầu vào.")
+        # Dòng này đã được sửa lỗi cú pháp
+        st.warning("Vui lòng ghi âm giọng nói trước khi nhấn nút Tạo Kết Quả.")
 
 
