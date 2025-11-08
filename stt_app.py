@@ -36,21 +36,35 @@ with st.sidebar:
         value="Người dùng nhấn nút Dừng hoặc nói từ khóa 'Kết thúc'"
     )
 
+from streamlit_webrtc import webrtc_streamer, WebRtcMode
+import streamlit as st
+# ... các import và setup khác ...
+
 # ----------------- Vùng Nhập Audio Chính (CHỈ MIC) -----------------
 st.header("🗣️ Nguồn Âm Thanh Đầu Vào (Mic Trực Tiếp)")
+st.info("Nhấn 'Start' bên dưới để kích hoạt Mic và bắt đầu ghi âm. Trình duyệt sẽ yêu cầu quyền truy cập.")
 
-# INPUT CHÍNH: Thay thế file uploader bằng chức năng ghi âm trực tiếp
-# Ghi chú: Để chức năng này hoạt động thực tế, cần sử dụng thư viện bổ sung 
-# của cộng đồng Streamlit như streamlit-webrtc hoặc một giải pháp tích hợp API STT.
+# Sử dụng WebRTC để bật mic
+ctx = webrtc_streamer(
+    key="mic-stt-input",
+    mode=WebRtcMode.SENDONLY, # Chỉ gửi dữ liệu từ mic, không hiển thị video
+    audio_html_attrs={
+        "autoPlay": True, 
+        "controls": True, 
+        "muted": False
+    },
+)
 
-st.error("**CHỨC NĂNG GHI ÂM TRỰC TIẾP**")
-st.markdown("> **⚠️ LƯU Ý:** Trong triển khai Streamlit thực tế, cần tích hợp **WebRTC** hoặc API ghi âm để kích hoạt mic. Đây là phần **logic placeholder** cho tính năng thu âm trực tiếp.")
-
-start_recording = st.button("🔴 Bắt Đầu Ghi Âm")
-stop_recording = st.button("⬛ Dừng Ghi Âm")
-
-# Mô phỏng đầu vào (tạo biến giả định)
-audio_source_input = "Mic Trực Tiếp Đã Ghi Âm" if start_recording else None
+# Thao tác: Kiểm tra xem luồng mic đã hoạt động chưa
+audio_source_input = None
+if ctx.state.playing:
+    st.success("Mic đang hoạt động! Bắt đầu nói...")
+    # Trong môi trường thực, bạn sẽ lấy dữ liệu từ ctx.audio_receiver
+    audio_source_input = "Mic Trực Tiếp Đã Ghi Âm (WebRTC)"
+else:
+    st.warning("Vui lòng nhấn 'Start' ở khung WebRTC để bật Mic.")
+    
+# ... phần còn lại của code ...
 
 
 # ----------------- Nút Thực thi -----------------
@@ -85,3 +99,4 @@ if st.button('✨ Tạo Kết Quả Chuyển Đổi', type="primary"):
         st.success(f"Chế độ xuất: **{result['export_mode_used']}**")
     else:
         st.warning("Vui lòng nhấn **'Bắt Đầu Ghi Âm'** để tạo dữ liệu đầu vào.")
+
