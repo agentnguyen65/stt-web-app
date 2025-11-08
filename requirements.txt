@@ -1,2 +1,2 @@
 streamlit
-streamlit-webrtc  # Thư viện cần thiết để bật mic
+streamlit-audiorecorder  # Thư viện chỉ dành cho Audio
