@@ -1,3 +1,2 @@
 streamlit
-# Cần thêm các thư viện xử lý giọng nói/dịch thuật thực tế nếu app không phải là mô phỏng
-# Ví dụ: librosa, deepgram-sdk, google-cloud-translate, v.v.
+streamlit-webrtc
