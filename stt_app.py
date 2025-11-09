@@ -62,7 +62,7 @@ col_control_1, col_control_2 = st.columns([1, 4])
 with col_control_1:
     if st.button("🔴 START RECORDING", type="primary", disabled=st.session_state.is_running):
         st.session_state.is_running = True
-        st.experimental_rerun() # Khởi động lại ứng dụng để vào vòng lặp
+        st.rerun() # ✅ ĐÃ SỬA LỖI
 
     if st.button("⬛ STOP RECORDING", type="secondary", disabled=not st.session_state.is_running):
         st.session_state.is_running = False
@@ -102,8 +102,9 @@ if st.session_state.is_running:
             
             # Cập nhật UI và lặp lại
             time.sleep(0.5) # Độ trễ cho mô phỏng real-time
-            st.experimental_rerun() # Buộc Streamlit cập nhật lại giao diện
+            st.rerun() # ✅ ĐÃ SỬA LỖI
 
 # Hiển thị thông báo khi ứng dụng không chạy
 if not st.session_state.is_running:
     output_placeholder.info("Nhấn START RECORDING để bắt đầu phiên dịch thời gian thực mới.")
+
