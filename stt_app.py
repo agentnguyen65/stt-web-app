@@ -1,90 +1,104 @@
-from streamlit_audiorecorder import st_audiorecorder
 import streamlit as st
+import time
 
-# ----------------- Cấu hình Giao diện -----------------
-st.set_page_config(page_title="SPG: Ứng dụng Chuyển Giọng Nói (STT)", layout="wide")
-st.title("🎤 Ứng dụng Chuyển Giọng Nói Thành Văn Bản (STT)")
-st.markdown("Sử dụng Quy trình STT đã thiết lập để chuyển đổi giọng nói.")
-
-# ----------------- Vùng Điều khiển Input (Sidebar) -----------------
-with st.sidebar:
-    st.header("⚙️ Thiết Lập Tham Số STT")
+# --- LOGIC API (Từ BƯỚC 2) ---
+def generate_response(input_data):
+    # Mô phỏng quá trình xử lý giọng nói, dịch thuật và xuất dữ liệu
+    time.sleep(1) # Tăng trải nghiệm thực tế
     
-    # INPUT 1: Chế độ Xuất
-    export_mode = st.radio(
-        "1. Chế độ Xuất Kết Quả",
-        ('Trực tiếp', 'Google Sheet'),
-        index=0,
-        help="Chọn nơi bạn muốn văn bản được xuất ra."
-    )
+    source_audio_type = input_data.get("Nguồn Âm thanh")
+    export_mode = input_data.get("Chế độ Xuất ra")
+    lang_source = input_data.get("Ngôn ngữ Gốc")
+    lang_target = input_data.get("Ngôn ngữ Dịch")
+
+    # MÔ PHỎNG KẾT QUẢ ĐẦU RA SAU KHI XỬ LÝ
+    text_source = f"Xin chào, tôi là một người máy, đang nói bằng {lang_source}."
+    text_target = f"Hello, I am a robot, speaking in {lang_target}."
     
-    # INPUT 2: Ngôn ngữ Mục tiêu
-    target_language = st.selectbox(
-        "2. Ngôn ngữ Mục tiêu",
-        ('Tiếng Việt', 'Tiếng Anh', 'Tiếng Pháp', 'Khác...'),
-        index=0
-    )
-
-    # INPUT 3: Điều kiện Xuất bản
-    publish_condition = st.text_input(
-        "3. Điều kiện Xuất bản (VD: Sau mỗi 3 dòng)",
-        value="Hết câu logic hoặc sau 10 giây im lặng"
-    )
-    
-    # INPUT 4: Điều kiện Dừng
-    stop_condition = st.text_input(
-        "4. Điều kiện Dừng (VD: Người dùng nói 'Dừng')",
-        value="Người dùng nhấn nút Dừng hoặc nói từ khóa 'Kết thúc'"
-    )
-
-# ----------------- Vùng Nhập Audio Chính (CHỈ MIC) -----------------
-st.header("🗣️ Nguồn Âm Thanh Đầu Vào (Ghi Âm Trực Tiếp)")
-st.info("Nhấn **'Record'** bên dưới để kích hoạt Mic và ghi lại giọng nói của bạn.")
-
-# Sử dụng component chuyên biệt để ghi âm
-wav_audio_data = st_audiorecorder()
-
-# Thao tác: Kiểm tra xem người dùng đã ghi âm xong chưa
-audio_source_input = None
-if wav_audio_data is not None:
-    # Nếu có dữ liệu, hiển thị trình phát lại và xác nhận đã ghi âm
-    st.audio(wav_audio_data, format='audio/wav')
-    st.success("✅ Ghi âm hoàn tất! Dữ liệu Audio đã sẵn sàng.")
-    # Cần dữ liệu bytes để xử lý STT thực tế
-    audio_source_input = wav_audio_data
-    
-# ----------------- Nút Thực thi -----------------
-if st.button('✨ Tạo Kết Quả Chuyển Đổi', type="primary"):
-    if audio_source_input is not None:
-        # Chuẩn bị dữ liệu đầu vào cho API
-        input_data = {
-            'audio_source': "Mic Data", # Chỉ dùng để minh họa trong placeholder
-            'export_mode': export_mode,
-            'target_language': target_language,
-            'publish_condition': publish_condition,
-            'stop_condition': stop_condition,
-        }
-        
-        # Gọi hàm xử lý (mô phỏng)
-        with st.spinner('Đang xử lý và chuyển đổi giọng nói...'):
-            # result = generate_stt_result(input_data, wav_audio_data) # Dùng trong môi trường thực
-            # Mô phỏng kết quả:
-            result = {
-                "transcribed_text": "Đây là văn bản được chuyển đổi **trực tiếp từ mic của bạn**, dựa trên: Ngôn ngữ [" + target_language + "], Xuất bản [" + publish_condition + "]. Chế độ File Uploader đã bị loại bỏ.",
-                "export_mode_used": export_mode
-            }
-
-        # ----------------- Vùng Hiển thị Kết quả -----------------
-        st.divider()
-        st.subheader("✅ Văn Bản Đã Chuyển Đổi Hoàn Chỉnh (OUTPUT)")
-        st.text_area(
-            "Văn bản", 
-            result["transcribed_text"], 
-            height=300
-        )
-        st.success(f"Chế độ xuất: **{result['export_mode_used']}**")
+    if export_mode == "Google Sheet":
+        export_status = f"Đã ghi song ngữ vào Google Sheet. Gốc: {lang_source}, Dịch: {lang_target}"
     else:
-        # Dòng này đã được sửa lỗi cú pháp
-        st.warning("Vui lòng ghi âm giọng nói trước khi nhấn nút Tạo Kết Quả.")
+        export_status = "Hiển thị trực tiếp (Direct Display)."
+
+    result = {
+        "Văn bản Ngôn ngữ Gốc": text_source,
+        "Văn bản Đã Dịch": text_target,
+        "Trạng thái Xuất": export_status
+    }
+    return result
+# -------------------------------
+
+st.set_page_config(page_title="SPG: Chuyển Đổi & Dịch Giọng Nói", layout="wide")
+
+st.title("🎙️ Ứng Dụng Chuyển Đổi & Dịch Giọng Nói (Real-time)")
+
+# --- Ô Nhập Thông tin (INPUT_SCHEMA) ---
+st.header("1. Thiết Lập Đầu Vào")
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.subheader("Cài Đặt Ngôn Ngữ")
+    # Ngôn ngữ Gốc
+    lang_source = st.selectbox(
+        "Ngôn ngữ Gốc (Đang Nghe)",
+        ("Tiếng Việt", "English", "日本語"), 
+        index=0,
+        key='lang_source'
+    )
+    # Ngôn ngữ Dịch
+    lang_target = st.selectbox(
+        "Ngôn ngữ Dịch (Đích)",
+        ("English", "Tiếng Việt", "日本語"),
+        index=0,
+        key='lang_target'
+    )
+
+with col2:
+    st.subheader("Nguồn & Chế Độ")
+    # Nguồn Âm thanh
+    source_audio_type = st.radio(
+        "Nguồn Âm Thanh",
+        ("Mở Micro Trực Tiếp", "Tải Lên Tệp Âm Thanh (.mp3, .wav)"),
+        key='audio_source'
+    )
+    # Chế độ Xuất ra
+    export_mode = st.radio(
+        "Chế Độ Xuất Kết Quả",
+        ("Trực Tiếp trên App", "Xuất sang Google Sheet"),
+        key='export_mode'
+    )
+
+# --- Nút “Tạo kết quả” ---
+st.markdown("---")
+if st.button("▶️ BẮT ĐẦU CHUYỂN ĐỔI (START CONVERSION)", type="primary"):
+    
+    # Chuẩn bị dữ liệu cho API
+    input_data = {
+        "Nguồn Âm thanh": source_audio_type,
+        "Chế độ Xuất ra": export_mode,
+        "Ngôn ngữ Gốc": lang_source,
+        "Ngôn ngữ Dịch": lang_target
+    }
+    
+    with st.spinner('Đang kết nối và xử lý...'):
+        # Gọi API Logic
+        results = generate_response(input_data)
+    
+    # --- Khung Hiển Thị Kết Quả (OUTPUT_SCHEMA) ---
+    st.success("✅ Đã Hoàn Thành Xử Lý!")
+    
+    col_res1, col_res2 = st.columns(2)
+    
+    with col_res1:
+        st.subheader(f"1. Văn bản Gốc ({lang_source})")
+        st.code(results["Văn bản Ngôn ngữ Gốc"], language='text')
+
+    with col_res2:
+        st.subheader(f"2. Văn bản Dịch ({lang_target})")
+        st.code(results["Văn bản Đã Dịch"], language='text')
+        
+    st.info(f"**Trạng thái Xuất:** {results['Trạng thái Xuất']}")
+
 
 
