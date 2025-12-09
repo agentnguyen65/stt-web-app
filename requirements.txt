@@ -1,4 +1,0 @@
-streamlit
-streamlit-webrtc
-google-cloud-speech
-google-cloud-translate
